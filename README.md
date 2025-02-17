@@ -1,4 +1,4 @@
-# 🚀 Minimal Traefik + Fluent Bit + ELK + FastAPI Demo
+# 🚀 Minimal Observability Stack with Traefik, Fluent Bit & FastAPI
 
 Welcome to the **most minimal logging & observability demo**! 🎪 This project is **not** a production-ready setup but a **simple, beginner-friendly demonstration** of how core components work together using **Docker containers**. If you're new to Traefik, Fluent Bit, Elasticsearch, and FastAPI, this is for you! 🚀
 
@@ -7,7 +7,7 @@ Welcome to the **most minimal logging & observability demo**! 🎪 This project 
 ## 🎯 What's Inside?
 
 ✔️ **Traefik** - A reverse proxy and load balancer 🛡️\
-✔️ **Fluent Bit** - A lightweight log processor 📜\
+✔️ **Fluent Bit** - A lightweight log processor 💜\
 ✔️ **Elasticsearch** - Stores and indexes logs 🔍\
 ✔️ **Kibana** - Visualizes logs beautifully 📊\
 ✔️ **FastAPI** - A simple app generating logs ⚡\
@@ -16,7 +16,7 @@ Welcome to the **most minimal logging & observability demo**! 🎪 This project 
 
 ---
 
-## 🏗️ Architecture Overview
+## 🏠 Architecture Overview
 
 ```plaintext
                      +--------------------+
@@ -24,21 +24,35 @@ Welcome to the **most minimal logging & observability demo**! 🎪 This project 
                      +---------+----------+
                                |
                                v
-                     +---------+----------+
+                     +---------+-----------+
                      |       Traefik       |
-                     +----+---------+-----+
+                     +----+---------+------+
                           |         |
-              +-----------+         +-----------+
+              +-----------+         +---------+
               |                               |
-    +---------v---------+           +---------v---------+
+    +---------v----------+           +--------v----------+
     |     Fluent Bit     |           |   Prometheus      |
-    +--------------------+           +-------------------+
+    +---------+----------+           +--------+----------+
               |                               |
-    +---------v---------+           +---------v---------+
+    +---------v--------------+       +--------v----------+
     | Elasticsearch + Kibana |       |      Grafana      |
-    +--------------------+           +-------------------+
-
+    +------------------------+       +-------------------+
 ```
+
+### 🚀 Request Flow
+
+1. **User makes a request** (e.g., `http://localhost/api`).
+2. **Traefik receives the request** and routes it to the appropriate backend service (FastAPI).
+3. **FastAPI processes the request** and returns a response.
+4. **Traefik forwards the response** back to the user.
+
+Meanwhile, in the background:
+- **Fluent Bit collects logs** from Traefik and FastAPI, then forwards them to Elasticsearch.
+- **Prometheus scrapes metrics** from Traefik and FastAPI.
+- **Grafana visualizes the collected metrics.**
+- **Kibana visualizes the logs** stored in Elasticsearch.
+
+So, **Traefik is the first point of contact** for all incoming requests before they reach FastAPI. 🚀
 
 ---
 
@@ -47,8 +61,8 @@ Welcome to the **most minimal logging & observability demo**! 🎪 This project 
 ### 1️⃣ Clone the Repo
 
 ```sh
-git clone https://github.com/your-repo/traefik-fluentbit-demo.git
-cd traefik-fluentbit-demo
+git clone https://github.com/joseph815132231518/traefik-demo.git
+cd traefik-demo
 ```
 
 ### 2️⃣ Start Everything 🚀
@@ -59,7 +73,7 @@ Spin up all services with Docker Compose:
 docker-compose up -d
 ```
 
-### 3️⃣ Check the Logs 🧐
+### 3️⃣ Check the Logs 🤨
 
 Ensure Fluent Bit is forwarding logs correctly:
 
@@ -114,6 +128,6 @@ PRs are welcome! If you think something can be improved for beginners, feel free
 
 ---
 
-## 📜 License
+## 🐜 License
 
 MIT - Feel free to use, modify, and share! 🚀
