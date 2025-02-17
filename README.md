@@ -118,6 +118,43 @@ Or visit: [http://localhost/api](http://localhost/api)
 
 ---
 
+## **🔹 Running the Client for a JWT Demo**
+This demo script generates a **JWT token**, attaches it to a request, and sends it to the FastAPI service through **Traefik**.
+
+#### **📌 Prerequisites**
+Before running the client, ensure:
+- The **FastAPI app** is running inside Docker (`docker-compose up -d`).
+- The **auth service** is correctly validating JWTs.
+- Python **3.8+** is installed on your system.
+
+#### **📛 Install Dependencies**
+Run the following command to install the required libraries:
+```bash
+pip install requests pyjwt
+```
+
+#### **▶️ Run the Client**
+Execute the script to generate a JWT and send a request:
+```bash
+python client.py
+```
+
+#### **📋 Expected Output**
+If authentication is set up correctly, you should see a **200 OK** response:
+```
+Status Code: 200
+Response: {"message":"Hello from FastAPI through Traefik!"}
+```
+If the token is **invalid or expired**, you may see:
+```
+Status Code: 401
+Response: {"detail":"Invalid token"}
+```
+
+#### **⚠️ Troubleshooting**
+- **SSL Issues?** If you get an SSL error, add `verify=False` in `requests.get()` (already included in `client.py`).
+- **401 Unauthorized?** Ensure the `SECRET_KEY` in `client.py` matches the one in the **auth service**.
+
 ## ⚠️ Important Notes
 
 - **This is not a production setup!** It's purely educational to show how each component works. 🧪

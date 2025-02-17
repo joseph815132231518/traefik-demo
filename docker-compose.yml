@@ -9,6 +9,7 @@ services:
       - "--api.insecure=true"           # Enable Traefik dashboard (DO NOT use in production)
       - "--providers.docker=true"        # Enable Docker service discovery
       - "--entrypoints.web.address=:80"  # Expose port 80
+      - "--entrypoints.websecure.address=:443"
       - "--metrics.prometheus=true"            # Enable Prometheus metrics
       - "--metrics.prometheus.entryPoint=web"  # Expose metrics on HTTP
       - "--accesslog=true"                      # Enable access log
@@ -16,6 +17,7 @@ services:
       - "--accesslog.filepath=/logs/access.log" # Log location inside the container
     ports:
       - "80:80"       # HTTP traffic
+      - "443:443"
       - "8080:8080"   # Traefik dashboard
       - "9090:9090"  # Prometheus UI
     volumes:
@@ -28,8 +30,31 @@ services:
     restart: always
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.app.rule=PathPrefix(`/api`)"
+      # HTTP Router: Redirect to HTTPS
+      - "traefik.http.routers.app-http.rule=PathPrefix(`/api`)"
+      - "traefik.http.routers.app-http.entrypoints=web"
+      - "traefik.http.routers.app-http.middlewares=https-redirect"
+      # HTTPS Router: Main secure route
+      - "traefik.http.routers.app-https.rule=PathPrefix(`/api`)"
+      - "traefik.http.routers.app-https.entrypoints=websecure"
+      - "traefik.http.routers.app-https.tls=true"
+      # HTTPS Router: jwt-auth
+      - "traefik.http.routers.app-https.middlewares=jwt-auth"
+      # Middleware: Redirect to HTTPS
+      - "traefik.http.middlewares.https-redirect.redirectscheme.scheme=https"
+      # Middleware: jwt-auth
+      - "traefik.http.middlewares.jwt-auth.forwardauth.address=http://auth:8001/validate"
+      - "traefik.http.middlewares.jwt-auth.forwardauth.trustForwardHeader=true"
+      - "traefik.http.middlewares.jwt-auth.forwardauth.authResponseHeaders=Authorization"
+      # Define backend FastAPI port
       - "traefik.http.services.app.loadbalancer.server.port=8000"
+
+  auth:
+    build: ./auth
+    container_name: "jwt_auth"
+    restart: always
+    ports:
+      - "8001:8001"
 
   prometheus:
     image: prom/prometheus:latest

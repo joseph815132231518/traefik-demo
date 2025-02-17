@@ -5,5 +5,5 @@ app = FastAPI()
 
 @app.get("/api")
 def read_root():
-    sleep(20)
+    sleep(5)
     return {"message": "Hello from FastAPI through Traefik!"}
