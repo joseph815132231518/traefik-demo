@@ -1,0 +1,79 @@
+version: "3.8"
+
+services:
+  traefik:
+    image: "traefik:v3.0"  # Use the latest Traefik
+    container_name: "traefik"
+    restart: always
+    command:
+      - "--api.insecure=true"           # Enable Traefik dashboard (DO NOT use in production)
+      - "--providers.docker=true"        # Enable Docker service discovery
+      - "--entrypoints.web.address=:80"  # Expose port 80
+      - "--metrics.prometheus=true"            # Enable Prometheus metrics
+      - "--metrics.prometheus.entryPoint=web"  # Expose metrics on HTTP
+      - "--accesslog=true"                      # Enable access log
+      - "--accesslog.format=json"               # Store logs in JSON format
+      - "--accesslog.filepath=/logs/access.log" # Log location inside the container
+    ports:
+      - "80:80"       # HTTP traffic
+      - "8080:8080"   # Traefik dashboard
+      - "9090:9090"  # Prometheus UI
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"  # Required for Traefik to talk to Docker
+      - ./logs:/logs  # Mount logs directory
+
+  app:
+    build: ./fastapi
+    container_name: "fastapi_app"
+    restart: always
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.app.rule=PathPrefix(`/api`)"
+      - "traefik.http.services.app.loadbalancer.server.port=8000"
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: "prometheus"
+    restart: always
+    ports:
+      - "9091:9090"  # Prometheus web UI
+    volumes:
+      - "./prometheus.yml:/etc/prometheus/prometheus.yml"
+
+  grafana:
+    image: "grafana/grafana:latest"
+    container_name: "grafana"
+    restart: always
+    ports:
+      - "3000:3000"   # Grafana UI
+    volumes:
+      - grafana_data:/var/lib/grafana
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.5.1
+    environment:
+      - "discovery.type=single-node"
+      - "xpack.security.enabled=false"  # Disable authentication for simplicity
+    ports:
+      - "9200:9200"
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:8.5.1
+    environment:
+      - "ELASTICSEARCH_HOSTS=http://elasticsearch:9200"
+    ports:
+      - "5601:5601"
+
+  fluent-bit:
+    image: fluent/fluent-bit:latest
+    volumes:
+      - ./fluent-bit.conf:/fluent-bit/etc/fluent-bit.conf
+      - ./parsers.conf:/fluent-bit/etc/parsers.conf
+      - ./logs:/logs  # Mount the logs directory
+    depends_on:
+      - elasticsearch
+      - traefik
+    command: ["/fluent-bit/bin/fluent-bit", "-c", "/fluent-bit/etc/fluent-bit.conf"]
+
+volumes:
+  grafana_data:
