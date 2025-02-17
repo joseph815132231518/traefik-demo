@@ -25,6 +25,11 @@ Welcome to the **most minimal logging & observability demo**! 🎪 This project 
                                |
                                v
                      +---------+-----------+
+                     |     Middleware      |  (HTTPS Redirect, JWT Auth)
+                     +---------+-----------+
+                               |
+                               v
+                     +---------+-----------+
                      |       Traefik       |
                      +----+---------+------+
                           |         |
