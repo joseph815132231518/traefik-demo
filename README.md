@@ -87,10 +87,15 @@ Or query Elasticsearch:
 curl -X GET "http://localhost:9200/_cat/indices?v"
 ```
 
-### 4️⃣ Open Kibana 🎩✨
+### 4️⃣ Open Kibana & Set Up Index 🎩✨
 
-1. Go to [http://localhost:5601](http://localhost:5601)
-2. Navigate to **Discover** and check for logs
+1. Go to http://localhost:5601
+2. Navigate to Stack Management → Index Patterns
+3. Click Create Index Pattern
+4. Select the index traefik-logs
+5. Choose @timestamp as the time filter field
+6. Click Create Index Pattern
+7. Navigate to Discover and check for logs
 
 ### 5️⃣ Test the FastAPI App ⚡
 
