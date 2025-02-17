@@ -17,7 +17,7 @@ def generate_jwt():
 jwt_token = generate_jwt()
 url = "https://localhost/api"
 headers = {
-    "Authorization": f"Bearer {jwt_token}123"
+    "Authorization": f"Bearer {jwt_token}"
 }
 response = requests.get(url, headers=headers, verify=False)  # `verify=False` skips SSL checks
 print("Status Code:", response.status_code)
